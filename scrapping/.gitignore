@@ -1,0 +1,33 @@
+# Raw data files
+raw/*.csv
+raw/*.xlsx
+raw/*.json
+
+# Cookies and authentication
+*.pkl
+amazon_cookies.pkl
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Virtual environment
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
