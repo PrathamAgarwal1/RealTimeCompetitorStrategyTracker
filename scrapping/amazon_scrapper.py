@@ -1,3 +1,4 @@
+import os
 import requests
 import pandas as pd
 from urllib.parse import urlparse
@@ -6,7 +7,7 @@ from time import sleep
 API_URL = "https://django.prixhistory.com/api/product/history/updateFromSlug"
 
 
-AUTH_TOKEN = "cKs563rEEEwJXRmeVyEdYHHHa9ZgsdQTmskTUD2GTyam79kLl9w6+dH1M26/FOma"
+AUTH_TOKEN = os.getenv("AUTH_TOKEN")
 
 def extract_slug(u: str) -> str:
     parts = [p for p in urlparse(u).path.split("/") if p]
