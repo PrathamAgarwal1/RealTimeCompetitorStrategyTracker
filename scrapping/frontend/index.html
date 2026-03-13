@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unified Scraper Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i data-lucide="database" class="logo-icon"></i>
+                <h2>Scraper<span class="highlight">Pro</span></h2>
+            </div>
+            
+            <nav class="nav-menu">
+                <p class="nav-title">PRICE TRACKING</p>
+                <div class="nav-item active" data-tab="amazon-price">
+                    <i data-lucide="line-chart"></i> Amazon Price
+                </div>
+                <div class="nav-item" data-tab="flipkart-price">
+                    <i data-lucide="bar-chart-2"></i> Flipkart Price
+                </div>
+                
+                <p class="nav-title mt-4">REVIEWS & SENTIMENT</p>
+                <div class="nav-item" data-tab="amazon-reviews">
+                    <i data-lucide="message-square"></i> Amazon Reviews
+                </div>
+                <div class="nav-item" data-tab="flipkart-reviews">
+                    <i data-lucide="star"></i> Flipkart Reviews
+                </div>
+
+                <p class="nav-title mt-4">DATA MANAGEMENT</p>
+                <div class="nav-item" data-tab="database">
+                    <i data-lucide="hard-drive"></i> Database Viewer
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <header class="topbar">
+                <div class="breadcrumbs">
+                    <span>Dashboard</span> <i data-lucide="chevron-right" class="breadcrumb-icon"></i> <span id="current-tab-name">Amazon Price</span>
+                </div>
+                <div class="user-profile">
+                    <div class="avatar">Admin</div>
+                </div>
+            </header>
+
+            <div class="content-body">
+                
+                <!-- Scraper Form Container -->
+                <section id="scraper-section" class="card form-card">
+                    <div class="card-header">
+                        <i data-lucide="zap" class="header-icon"></i>
+                        <div>
+                            <h3 id="form-title">Amazon Price History Scraper</h3>
+                            <p id="form-desc" class="text-muted">Enter a PriceHistoryApp URL for an Amazon product to scrape historical pricing data.</p>
+                        </div>
+                    </div>
+                    
+                    <form id="scraper-form" class="scraper-form">
+                        <!-- Dynamic inputs injected by JS -->
+                        <div id="dynamic-inputs" class="input-group">
+                            <label for="url-input">PriceHistoryApp URL</label>
+                            <input type="url" id="url-input" placeholder="https://pricehistoryapp.com/product/..." required>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="submit" id="run-btn" class="btn btn-primary">
+                                <i data-lucide="play"></i> 
+                                <span>Run Scraper</span>
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Loading / Status State -->
+                    <div id="status-container" class="status-container hidden">
+                        <div class="spinner"></div>
+                        <p id="status-text">Initializing scraper...</p>
+                        <p class="status-subtext">This may take up to 60 seconds depending on the anti-bot measures.</p>
+                    </div>
+                </section>
+
+                <!-- Data Viewer Section -->
+                <section class="card data-card hidden" id="data-section">
+                    <div class="card-header flex-between">
+                        <div class="header-left">
+                            <i data-lucide="table" class="header-icon"></i>
+                            <div>
+                                <h3>Collected Data</h3>
+                                <p class="text-muted">Review the latest scraped items or download the raw dataset.</p>
+                            </div>
+                        </div>
+                        <div class="header-actions">
+                            <button id="refresh-db-btn" class="btn btn-outline">
+                                <i data-lucide="refresh-cw"></i> Refresh
+                            </button>
+                            <button id="download-csv-btn" class="btn btn-primary">
+                                <i data-lucide="download"></i> Download CSV
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="table-container">
+                        <table id="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Timestamp / Date</th>
+                                    <th>Source</th>
+                                    <th>Product</th>
+                                    <th>Rating/Price</th>
+                                    <th>Review Text / URL</th>
+                                </tr>
+                            </thead>
+                            <tbody id="data-table-body">
+                                <!-- Data rows injected here -->
+                                <tr><td colspan="5" class="text-center py-4">Loading data...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+</html>
