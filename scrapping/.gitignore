@@ -2,6 +2,7 @@
 raw/*.csv
 raw/*.xlsx
 raw/*.json
+data/
 
 # Cookies and authentication
 *.pkl
