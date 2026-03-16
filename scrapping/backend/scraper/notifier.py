@@ -31,23 +31,48 @@ def _save_alerts(alerts: list[dict]):
         json.dump(alerts, f, indent=4)
 
 
-def subscribe_user(email: str, product_name: str) -> bool:
+def subscribe_user(email: str, product_name: str, target_price: float) -> bool:
     """Subscribe a user to a specific product's deal alerts."""
     alerts = _load_alerts()
     
     # Check if already subscribed
     for a in alerts:
         if a.get("email") == email and a.get("product_name") == product_name:
-            return True # already subscribed
+            a["target_price"] = target_price
+            a["active"] = True
+            _save_alerts(alerts)
+            return True # already subscribed, update target
             
     alerts.append({
         "email": email,
         "product_name": product_name,
+        "target_price": target_price,
         "active": True
     })
     
     _save_alerts(alerts)
     return True
+
+def check_and_send_alerts(product_name: str, current_price: float, decision_text: str):
+    """Check active subscriptions and send alerts if target price is met."""
+    if not current_price:
+        return
+        
+    alerts = _load_alerts()
+    updated = False
+    
+    for a in alerts:
+        if a.get("product_name") == product_name and a.get("active", False):
+            target_price = a.get("target_price")
+            if target_price is not None and current_price <= target_price:
+                # Target price met, trigger alert
+                success = send_deal_alert(a["email"], product_name, current_price, decision_text)
+                if success:
+                    a["active"] = False
+                    updated = True
+                    
+    if updated:
+        _save_alerts(alerts)
 
 def get_subscriptions_for_product(product_name: str) -> list[str]:
     """Get all active emails subscribed to a product."""

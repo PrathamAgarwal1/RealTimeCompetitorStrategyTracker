@@ -62,6 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const decisionRatio = document.getElementById('decision-ratio');
     
     const alertEmail = document.getElementById('alert-email');
+    const targetPriceInput = document.getElementById('target-price');
     const subscribeBtn = document.getElementById('subscribe-alert-btn');
     const subscribeStatus = document.getElementById('subscribe-status');
     let sentimentChart = null;
@@ -572,10 +573,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     subscribeBtn.addEventListener('click', async () => {
         const email = alertEmail.value;
+        const target_price = parseFloat(targetPriceInput.value);
         const product_name = decisionProductSelect.value;
         
         if (!email || !email.includes('@')) {
             alert('Please enter a valid email address.');
+            return;
+        }
+        if (isNaN(target_price) || target_price <= 0) {
+            alert('Please enter a valid target price.');
             return;
         }
         if (!product_name) {
@@ -590,7 +596,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const res = await fetch('/api/subscribe', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, product_name })
+                body: JSON.stringify({ email, product_name, target_price })
             });
             const result = await res.json();
 

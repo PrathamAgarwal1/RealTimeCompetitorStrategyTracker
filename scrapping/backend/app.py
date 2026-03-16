@@ -13,7 +13,7 @@ from .database import save_data, load_data
 from .scraper.flipkart_price import fetch_flipkart_price_history
 from .scraper.flipkart_reviews import fetch_flipkart_reviews
 from .scraper.sentiment import analyze_reviews
-from .scraper.notifier import subscribe_user
+from .scraper.notifier import subscribe_user, check_and_send_alerts
 
 from .forecasting.data_handler import (
     list_products,
@@ -267,6 +267,10 @@ def make_decision(product_name, product_prices, product_reviews):
             decision = "Wait"
             reason = "Price is high and reviews are poor. Not recommended to buy right now."
 
+    
+    if current_price and price_status != "Unknown":
+        check_and_send_alerts(product_name, current_price, reason)
+
     return {
         "success": True, 
         "decision": decision, 
@@ -279,11 +283,12 @@ def make_decision(product_name, product_prices, product_reviews):
 class SubscribeRequest(BaseModel):
     email: str
     product_name: str
+    target_price: float
 
 @app.post("/api/subscribe")
 async def api_subscribe_alerts(req: SubscribeRequest):
     """Subscribe a user to deal alerts for a product."""
-    success = subscribe_user(req.email, req.product_name)
+    success = subscribe_user(req.email, req.product_name, req.target_price)
     if success:
          return {"success": True, "message": "Successfully subscribed to alerts."}
     raise HTTPException(status_code=500, detail="Failed to subscribe.")

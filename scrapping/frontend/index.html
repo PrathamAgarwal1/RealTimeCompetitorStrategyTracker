@@ -236,8 +236,9 @@
                             <div class="card form-card" style="padding: 1.5rem;">
                                 <h4>Price Drop Alerts</h4>
                                 <p class="text-muted" style="margin-bottom: 1rem; font-size: 0.85rem;">Subscribe to get notified when the model predicts a good time to buy.</p>
-                                <div class="input-group" style="margin-bottom: 1rem;">
-                                    <input type="email" id="alert-email" placeholder="Your email address" required>
+                                <div class="input-group" style="margin-bottom: 1rem; display: flex; gap: 0.5rem;">
+                                    <input type="email" id="alert-email" placeholder="Your email address" required style="flex: 1;">
+                                    <input type="number" id="target-price" placeholder="Target Price (₹)" required style="width: 120px;">
                                 </div>
                                 <button id="subscribe-alert-btn" class="btn btn-outline" style="width: 100%;">
                                     <i data-lucide="bell"></i> Subscribe
