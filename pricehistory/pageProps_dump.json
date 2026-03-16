@@ -1,0 +1,372 @@
+{
+  "locale": "en-IN",
+  "ogProduct": {
+    "id": 4644980,
+    "country": {
+      "currency_icon": "\u20b9",
+      "country_code": "en-in"
+    },
+    "category": {
+      "name": "Mobiles",
+      "slug": "mobiles"
+    },
+    "store": {
+      "name": "Amazon",
+      "slug": "amazon-in",
+      "prime_image": "https://cdn.pricehistory.in/media/store/Amazon-Prime.png",
+      "image": "https://cdn.pricehistory.in/media/store/amazon.png",
+      "isSearchable": true,
+      "searchUrl": "https://www.amazon.in/s?k=",
+      "searchSeperator": "+"
+    },
+    "stock": true,
+    "drop_chances": 1,
+    "discount": 56.324840764331206,
+    "pid": "",
+    "slug": "apple-iphone-15-128-gb-black",
+    "short_slug": "190d-39a6",
+    "name": "Apple iPhone 15 (128 GB) - Black",
+    "url": "",
+    "is_prime": false,
+    "history": {},
+    "features": [
+      "DYNAMIC ISLAND COMES TO IPHONE 15 \u2014 Dynamic Island bubbles up alerts and Live Activities \u2014 so you don\u2019t miss them while you\u2019re doing something else. You can see who\u2019s calling, track your next ride, check your flight status, and so much more.",
+      "INNOVATIVE DESIGN \u2014 iPhone 15 features a durable color-infused glass and aluminum design. It\u2019s splash, water, and dust resistant. The Ceramic Shield front is tougher than any smartphone glass. And the 6.1\" Super Retina XDR display is up to 2x brighter in the sun compared to iPhone 14.",
+      "48MP MAIN CAMERA WITH 2X TELEPHOTO \u2014 The 48MP Main camera shoots in super-high resolution. So it\u2019s easier than ever to take standout photos with amazing detail. The 2x optical-quality Telephoto lets you frame the perfect close-up.",
+      "NEXT-GENERATION PORTRAITS \u2014 Capture portraits with dramatically more detail and color. Just tap to shift the focus between subjects \u2014 even after you take the shot.",
+      "POWERHOUSE A16 BIONIC CHIP \u2014 The superfast chip powers advanced features like computational photography, fluid Dynamic Island transitions, and Voice Isolation for phone calls. And A16 Bionic is incredibly efficient to help deliver great all-day battery life."
+    ],
+    "history_fetched_at": "2025-09-25T12:09:59.239568Z",
+    "price": 47999,
+    "price_fetched_at": "2025-09-26T12:56:33.553888Z",
+    "mrp": 109900,
+    "lowest_price": 46999,
+    "highest_price": 109900,
+    "average_price": 69839,
+    "image": "https://m.media-amazon.com/images/I/31Na4uyIEyL.jpg?",
+    "rating": 0,
+    "rating_count": 0,
+    "in_stock": true,
+    "updated_at": "2025-09-29T02:57:36.949715Z",
+    "similar_deals": [
+      {
+        "product": {
+          "name": "Apple iPhone 12 (64GB) - Blue",
+          "country": {
+            "currency_icon": "\u20b9",
+            "country_code": "en-in"
+          },
+          "slug": "apple-iphone-12-64gb-blue",
+          "image": "https://m.media-amazon.com/images/I/417PwBC%2BiEL.jpg?",
+          "rating": 4.5,
+          "rating_count": 32964,
+          "is_prime": false
+        },
+        "category": {
+          "name": "Mobiles",
+          "slug": "mobiles"
+        },
+        "store": {
+          "name": "Amazon",
+          "slug": "amazon-in",
+          "prime_image": "https://cdn.pricehistory.in/media/store/Amazon-Prime.png",
+          "image": "https://cdn.pricehistory.in/media/store/amazon.png",
+          "isSearchable": true,
+          "searchUrl": "https://www.amazon.in/s?k=",
+          "searchSeperator": "+"
+        },
+        "price": 54899,
+        "highest_price": 106900,
+        "is_all_time_low": false,
+        "discount": 48.64,
+        "updated_at": "2024-04-13T20:55:52.336135Z"
+      },
+      {
+        "product": {
+          "name": "KAPAVER\u00ae Rugged Back Case for Redmi K40 / K40 Pro / K40 Pro Plus/Mi 11X / 11X Pro / 11i / Poco F3 MIL-STD 810G Officially Dro",
+          "country": {
+            "currency_icon": "\u20b9",
+            "country_code": "en-in"
+          },
+          "slug": "kapaver-r-rugged-back-case-for-redmi-k40-k40-pro-k40-pro-plus-mi-11x-11x-pro-11i-poco-f3-mil-std-810g-officially-dro",
+          "image": "https://m.media-amazon.com/images/I/61z3VVdK9KS._AC_UF350,350_QL50_.jpg?",
+          "rating": 0,
+          "rating_count": 0,
+          "is_prime": false
+        },
+        "category": {
+          "name": "Mobiles",
+          "slug": "mobiles"
+        },
+        "store": {
+          "name": "Amazon",
+          "slug": "amazon-in",
+          "prime_image": "https://cdn.pricehistory.in/media/store/Amazon-Prime.png",
+          "image": "https://cdn.pricehistory.in/media/store/amazon.png",
+          "isSearchable": true,
+          "searchUrl": "https://www.amazon.in/s?k=",
+          "searchSeperator": "+"
+        },
+        "price": 439,
+        "highest_price": 799,
+        "is_all_time_low": false,
+        "discount": 45.06,
+        "updated_at": "2024-04-13T21:15:31.997989Z"
+      },
+      {
+        "product": {
+          "name": "Fire-Boltt India's No 1 Smartwatch Brand Talk 2 Bluetooth Calling with SpO2 Tracking, Full Metal Body Watch, 60 Sports Mode, in Built Mic & Speaker with Gaming & IP68 Rating, Silver Grey, Free Size",
+          "country": {
+            "currency_icon": "\u20b9",
+            "country_code": "en-in"
+          },
+          "slug": "fire-boltt-india-s-no-1-smartwatch-brand-talk-2-bluetooth-calling-with-spo2-tracking-full-metal-body-watch-60-sports-mode-in-built-mic-speaker-with-gaming-ip68-rating-silver-grey-free-size",
+          "image": "https://m.media-amazon.com/images/I/41vMaBVWDjL.jpg?",
+          "rating": 4,
+          "rating_count": 35584,
+          "is_prime": false
+        },
+        "category": {
+          "name": "Mobiles",
+          "slug": "mobiles"
+        },
+        "store": {
+          "name": "Amazon",
+          "slug": "amazon-in",
+          "prime_image": "https://cdn.pricehistory.in/media/store/Amazon-Prime.png",
+          "image": "https://cdn.pricehistory.in/media/store/amazon.png",
+          "isSearchable": true,
+          "searchUrl": "https://www.amazon.in/s?k=",
+          "searchSeperator": "+"
+        },
+        "price": 1299,
+        "highest_price": 3499,
+        "is_all_time_low": false,
+        "discount": 62.88,
+        "updated_at": "2024-04-13T21:18:42.594504Z"
+      },
+      {
+        "product": {
+          "name": "RPM Euro Games Finger Sleeves Pack of 3 Boxes/ 6 Pieces for Mobile Gaming with Super Conductive Fiber Fabric, Anti-Sweat and",
+          "country": {
+            "currency_icon": "\u20b9",
+            "country_code": "en-in"
+          },
+          "slug": "rpm-euro-games-finger-sleeves-pack-of-3-boxes-6-pieces-for-mobile-gaming-with-super-conductive-fiber-fabric-anti-sweat-and",
+          "image": "https://m.media-amazon.com/images/I/71RmGlgsHbL._AC_UF350,350_QL50_.jpg?",
+          "rating": 0,
+          "rating_count": 0,
+          "is_prime": false
+        },
+        "category": {
+          "name": "Mobiles",
+          "slug": "mobiles"
+        },
+        "store": {
+          "name": "Amazon",
+          "slug": "amazon-in",
+          "prime_image": "https://cdn.pricehistory.in/media/store/Amazon-Prime.png",
+          "image": "https://cdn.pricehistory.in/media/store/amazon.png",
+          "isSearchable": true,
+          "searchUrl": "https://www.amazon.in/s?k=",
+          "searchSeperator": "+"
+        },
+        "price": 189,
+        "highest_price": 369,
+        "is_all_time_low": false,
+        "discount": 48.78,
+        "updated_at": "2024-04-13T21:30:51.374265Z"
+      },
+      {
+        "product": {
+          "name": "Carry case for Oculus Quest 2 VR glass Double Layer Easy Storage Box and Hand Carrying Bag Virtual Reality Device unit For Controllers + Charger + Data Cable + Kit Accesories",
+          "country": {
+            "currency_icon": "\u20b9",
+            "country_code": "en-in"
+          },
+          "slug": "carry-case-for-oculus-quest-2-vr-glass-double-layer-easy-storage-box-and-hand-carrying-bag-virtual-reality-device-unit-for-controllers-charger-data-cable-kit-accesories",
+          "image": "https://m.media-amazon.com/images/I/51uBhQCA88L.jpg",
+          "rating": 4,
+          "rating_count": 213,
+          "is_prime": false
+        },
+        "category": {
+          "name": "Mobiles",
+          "slug": "mobiles"
+        },
+        "store": {
+          "name": "Amazon",
+          "slug": "amazon-in",
+          "prime_image": "https://cdn.pricehistory.in/media/store/Amazon-Prime.png",
+          "image": "https://cdn.pricehistory.in/media/store/amazon.png",
+          "isSearchable": true,
+          "searchUrl": "https://www.amazon.in/s?k=",
+          "searchSeperator": "+"
+        },
+        "price": 1099,
+        "highest_price": 2199,
+        "is_all_time_low": true,
+        "discount": 50.02,
+        "updated_at": "2024-04-13T22:02:23.247589Z"
+      }
+    ],
+    "similar_products": [
+      {
+        "name": "ULTRADART 20 W Quick Charge 3.1 A Wall Charger for Mobile",
+        "country": {
+          "currency_icon": "\u20b9",
+          "country_code": "en-in"
+        },
+        "slug": "ultradart-20-w-quick-charge-3-1-a-wall-charger-for-mobile",
+        "image": "https://rukminim1.flixcart.com/image/600/600/xif0q/battery-charger/t/k/9/20w-usb-c-power-delivery-charger-adaptor-fast-charger-ultradart-original-imahgypftynzfxu2.jpeg?q=70",
+        "highest_price": 219,
+        "discount": 0,
+        "price": 219,
+        "store": {
+          "name": "Flipkart",
+          "slug": "flipkart-com",
+          "prime_image": "https://cdn.pricehistory.in/media/store/fa_62673a.png",
+          "image": "https://cdn.pricehistory.in/media/store/flipkart.png",
+          "isSearchable": true,
+          "searchUrl": "https://www.flipkart.com/search?q=",
+          "searchSeperator": "%20"
+        },
+        "category": {
+          "name": "Mobiles",
+          "slug": "mobiles"
+        },
+        "features": [],
+        "rating": 0,
+        "rating_count": 0,
+        "url": "https://www.flipkart.com/ultradart-20-w-quick-charge-3-1-wall-charger-mobile/p/itm3259e3f780a0f?pid=ACCGGNDSBQGHXCEZ",
+        "is_prime": false
+      },
+      {
+        "name": "Clickcase Flip Cover for POCO M7 Pro 5G",
+        "country": {
+          "currency_icon": "\u20b9",
+          "country_code": "en-in"
+        },
+        "slug": "clickcase-flip-cover-for-poco-m7-pro-5g",
+        "image": "https://rukminim1.flixcart.com/image/600/600/xif0q/cases-covers/flip-cover/n/j/l/brownico-831-perkie-original-imah8zxfyravngbk.jpeg?q=70",
+        "highest_price": 500,
+        "discount": 0,
+        "price": 500,
+        "store": {
+          "name": "Flipkart",
+          "slug": "flipkart-com",
+          "prime_image": "https://cdn.pricehistory.in/media/store/fa_62673a.png",
+          "image": "https://cdn.pricehistory.in/media/store/flipkart.png",
+          "isSearchable": true,
+          "searchUrl": "https://www.flipkart.com/search?q=",
+          "searchSeperator": "%20"
+        },
+        "category": {
+          "name": "Mobiles",
+          "slug": "mobiles"
+        },
+        "features": [
+          "Suitable For: Mobile",
+          "Material: Artificial Leather, Silicon",
+          "Theme: No Theme",
+          "Type: Flip Cover"
+        ],
+        "rating": 0,
+        "rating_count": 0,
+        "url": "https://www.flipkart.com/clickcase-flip-cover-poco-m7-pro-5g/p/itmea306dd8bff2e?pid=ACCH9256MZXCHGW3",
+        "is_prime": false
+      },
+      {
+        "name": "Celvas Back Cover for Apple iPhone 13",
+        "country": {
+          "currency_icon": "\u20b9",
+          "country_code": "en-in"
+        },
+        "slug": "celvas-back-cover-for-apple-iphone-13-2f53",
+        "image": "https://rukminim1.flixcart.com/image/600/600/xif0q/cases-covers/back-cover/z/y/e/iphone-13-celvas-original-imahe96eehw2cvhw.jpeg?q=70",
+        "highest_price": 286,
+        "discount": 0,
+        "price": 286,
+        "store": {
+          "name": "Flipkart",
+          "slug": "flipkart-com",
+          "prime_image": "https://cdn.pricehistory.in/media/store/fa_62673a.png",
+          "image": "https://cdn.pricehistory.in/media/store/flipkart.png",
+          "isSearchable": true,
+          "searchUrl": "https://www.flipkart.com/search?q=",
+          "searchSeperator": "%20"
+        },
+        "category": {
+          "name": "Mobiles",
+          "slug": "mobiles"
+        },
+        "features": [],
+        "rating": 4.1,
+        "rating_count": 1327,
+        "url": "https://www.flipkart.com/celvas-back-cover-apple-iphone-13/p/itmec68e6d79d543?pid=ACCGXUPDAGWZ5TVG",
+        "is_prime": false
+      },
+      {
+        "name": "TRIESTER Back Cover for 3D Cute Coffee & Cartoon Design Soft Back Cover for Motorola G60",
+        "country": {
+          "currency_icon": "\u20b9",
+          "country_code": "en-in"
+        },
+        "slug": "triester-back-cover-for-3d-cute-coffee-cartoon-design-soft-back-cover-for-motorola-g60",
+        "image": "https://rukminim1.flixcart.com/image/600/600/xif0q/cases-covers/back-cover/k/a/3/g60-triester-original-imahd8pngn4gw6y9.jpeg?q=70",
+        "highest_price": 224,
+        "discount": 0,
+        "price": 224,
+        "store": {
+          "name": "Flipkart",
+          "slug": "flipkart-com",
+          "prime_image": "https://cdn.pricehistory.in/media/store/fa_62673a.png",
+          "image": "https://cdn.pricehistory.in/media/store/flipkart.png",
+          "isSearchable": true,
+          "searchUrl": "https://www.flipkart.com/search?q=",
+          "searchSeperator": "%20"
+        },
+        "category": {
+          "name": "Mobiles",
+          "slug": "mobiles"
+        },
+        "features": [],
+        "rating": 4.5,
+        "rating_count": 12,
+        "url": "https://www.flipkart.com/triester-back-cover-3d-cute-coffee-cartoon-design-soft-motorola-g60/p/itme8a36c1af6dc0?pid=ACCHD8PNJWDCX4YE",
+        "is_prime": false
+      },
+      {
+        "name": "SMARTPOCKET Back Cover for Motorola G60",
+        "country": {
+          "currency_icon": "\u20b9",
+          "country_code": "en-in"
+        },
+        "slug": "smartpocket-back-cover-for-motorola-g60",
+        "image": "https://rukminim1.flixcart.com/image/600/600/xif0q/cases-covers/back-cover/w/s/v/coffee-mto-g60-black-smartpocket-original-imahey9trudd7dah.jpeg?q=70",
+        "highest_price": 299,
+        "discount": 0,
+        "price": 299,
+        "store": {
+          "name": "Flipkart",
+          "slug": "flipkart-com",
+          "prime_image": "https://cdn.pricehistory.in/media/store/fa_62673a.png",
+          "image": "https://cdn.pricehistory.in/media/store/flipkart.png",
+          "isSearchable": true,
+          "searchUrl": "https://www.flipkart.com/search?q=",
+          "searchSeperator": "%20"
+        },
+        "category": {
+          "name": "Mobiles",
+          "slug": "mobiles"
+        },
+        "features": [],
+        "rating": 0,
+        "rating_count": 0,
+        "url": "https://www.flipkart.com/smartpocket-back-cover-motorola-g60/p/itm7ef8b22000293?pid=ACCHEY9TMHDBSCRT",
+        "is_prime": false
+      }
+    ]
+  },
+  "apiUrl": "https://django.prixhistory.com"
+}

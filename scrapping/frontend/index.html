@@ -3,39 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Unified Scraper Dashboard</title>
+    <title>Price Forecasting Dashboard</title>
+    <meta name="description" content="AI-powered price forecasting using Prophet and Chronos models. Predict future prices and find the best time to buy.">
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 </head>
 <body>
     <div class="app-container">
         <!-- Sidebar Navigation -->
         <aside class="sidebar">
             <div class="sidebar-header">
-                <i data-lucide="database" class="logo-icon"></i>
-                <h2>Scraper<span class="highlight">Pro</span></h2>
+                <i data-lucide="trending-up" class="logo-icon"></i>
+                <h2>Forecast<span class="highlight">Pro</span></h2>
             </div>
             
             <nav class="nav-menu">
-                <p class="nav-title">PRICE TRACKING</p>
-                <div class="nav-item active" data-tab="amazon-price">
-                    <i data-lucide="line-chart"></i> Amazon Price
+                <p class="nav-title">FORECASTING</p>
+                <div class="nav-item active" data-tab="forecast" id="nav-forecast">
+                    <i data-lucide="brain"></i> Price Forecast
                 </div>
-                <div class="nav-item" data-tab="flipkart-price">
+
+                <div class="nav-item" data-tab="metrics" id="nav-metrics">
+                    <i data-lucide="bar-chart-3"></i> Model Metrics
+                </div>
+
+                <div class="nav-item" data-tab="decision" id="nav-decision">
+                    <i data-lucide="shield-check"></i> Decision & Alerts
+                </div>
+
+                <div class="nav-item" data-tab="sentiment" id="nav-sentiment">
+                    <i data-lucide="message-square"></i> Sentiment Analysis
+                </div>
+
+                <p class="nav-title mt-4">SCRAPING</p>
+                <div class="nav-item" data-tab="flipkart-price" id="nav-flipkart-price">
                     <i data-lucide="bar-chart-2"></i> Flipkart Price
                 </div>
-                
-                <p class="nav-title mt-4">REVIEWS & SENTIMENT</p>
-                <div class="nav-item" data-tab="amazon-reviews">
-                    <i data-lucide="message-square"></i> Amazon Reviews
-                </div>
-                <div class="nav-item" data-tab="flipkart-reviews">
+                <div class="nav-item" data-tab="flipkart-reviews" id="nav-flipkart-reviews">
                     <i data-lucide="star"></i> Flipkart Reviews
                 </div>
 
                 <p class="nav-title mt-4">DATA MANAGEMENT</p>
-                <div class="nav-item" data-tab="database">
+                <div class="nav-item" data-tab="database" id="nav-database">
                     <i data-lucide="hard-drive"></i> Database Viewer
                 </div>
             </nav>
@@ -45,7 +57,7 @@
         <main class="main-content">
             <header class="topbar">
                 <div class="breadcrumbs">
-                    <span>Dashboard</span> <i data-lucide="chevron-right" class="breadcrumb-icon"></i> <span id="current-tab-name">Amazon Price</span>
+                    <span>Dashboard</span> <i data-lucide="chevron-right" class="breadcrumb-icon"></i> <span id="current-tab-name">Price Forecast</span>
                 </div>
                 <div class="user-profile">
                     <div class="avatar">Admin</div>
@@ -53,24 +65,288 @@
             </header>
 
             <div class="content-body">
-                
-                <!-- Scraper Form Container -->
-                <section id="scraper-section" class="card form-card">
+
+                <!-- ═══════════ Forecast Section ═══════════ -->
+                <section id="forecast-section">
+                    <!-- Controls -->
+                    <div class="card form-card">
+                        <div class="card-header">
+                            <i data-lucide="brain" class="header-icon"></i>
+                            <div>
+                                <h3>Run Price Forecast</h3>
+                                <p class="text-muted">Select a dataset and model to generate price predictions.</p>
+                            </div>
+                        </div>
+
+                        <div class="forecast-controls">
+                            <div class="control-group">
+                                <label for="product-select">Product</label>
+                                <select id="product-select">
+                                    <option value="">— select product —</option>
+                                </select>
+                            </div>
+                            <div class="control-group">
+                                <label for="model-select">Model</label>
+                                <select id="model-select">
+                                    <option value="both">Both (Prophet + Chronos)</option>
+                                    <option value="prophet">Prophet Only</option>
+                                    <option value="chronos">Chronos Only</option>
+                                </select>
+                            </div>
+                            <div class="control-group">
+                                <label for="periods-input">Forecast Days</label>
+                                <input type="number" id="periods-input" value="30" min="7" max="180" step="1">
+                            </div>
+                            <div class="control-group control-action">
+                                <button id="run-forecast-btn" class="btn btn-primary btn-lg">
+                                    <i data-lucide="play"></i> Run Forecast
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="forecast-loading" class="status-container hidden">
+                            <div class="spinner"></div>
+                            <p>Running forecast model(s)... This may take 30-60 seconds.</p>
+                        </div>
+                    </div>
+
+                    <!-- Best time to buy -->
+                    <div id="best-buy-section" class="hidden">
+                        <div class="best-buy-cards" id="best-buy-cards"></div>
+                    </div>
+
+                    <!-- Chart -->
+                    <div id="chart-card" class="card chart-card hidden">
+                        <div class="card-header">
+                            <i data-lucide="line-chart" class="header-icon"></i>
+                            <div>
+                                <h3>Price Forecast Visualization</h3>
+                                <p class="text-muted">Historical prices vs. model predictions with confidence intervals.</p>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="forecast-chart"></canvas>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ═══════════ Metrics Section ═══════════ -->
+                <section id="metrics-section" class="hidden">
+                    <div class="card">
+                        <div class="card-header">
+                            <i data-lucide="bar-chart-3" class="header-icon"></i>
+                            <div>
+                                <h3>Model Evaluation Metrics</h3>
+                                <p class="text-muted">Performance comparison between Prophet and Chronos on the test set (last 20% of data).</p>
+                            </div>
+                        </div>
+
+                        <div id="metrics-empty" class="empty-state">
+                            <i data-lucide="flask-conical" style="width:48px;height:48px;color:var(--accent-primary);opacity:0.6;"></i>
+                            <p>Run a forecast first to see evaluation metrics here.</p>
+                        </div>
+
+                        <div id="metrics-content" class="hidden">
+                            <div class="metrics-grid" id="metrics-grid"></div>
+                            <div class="metrics-table-wrap">
+                                <table id="metrics-table" class="metrics-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Metric</th>
+                                            <th id="th-prophet" class="hidden">Prophet</th>
+                                            <th id="th-chronos" class="hidden">Chronos</th>
+                                            <th>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="metrics-table-body"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ═══════════ Decision & Alerts Section ═══════════ -->
+                <section id="decision-section" class="hidden">
+                    <div class="card form-card">
+                        <div class="card-header">
+                            <i data-lucide="shield-check" class="header-icon"></i>
+                            <div>
+                                <h3>AI Purchasing Decision</h3>
+                                <p class="text-muted">Analyze price and reviews to make an informed buying decision.</p>
+                            </div>
+                        </div>
+
+                        <div class="forecast-controls">
+                            <!-- DB Inputs -->
+                            <div class="control-group" id="decision-db-inputs">
+                                <label for="decision-product-select">Select Product</label>
+                                <select id="decision-product-select">
+                                    <option value="">— select product —</option>
+                                </select>
+                            </div>
+                            
+                            <div class="control-group control-action" style="grid-column: span 3; display: flex; align-items: flex-end;">
+                                <button id="run-decision-btn" class="btn btn-primary btn-lg">
+                                    <i data-lucide="zap"></i> Analyze & Decide
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="decision-loading" class="status-container hidden">
+                            <div class="spinner"></div>
+                            <p>Analyzing price history and sentiment data...</p>
+                        </div>
+                    </div>
+
+                    <div id="decision-results" class="decision-layout hidden">
+                        <!-- Left: Decision Widget -->
+                        <div id="decision-widget" class="decision-widget wait">
+                            <div class="decision-icon-container">
+                                <i id="decision-icon" data-lucide="clock" class="decision-icon"></i>
+                            </div>
+                            <h2 id="decision-title" class="decision-title">Wait</h2>
+                            <p id="decision-reason" class="decision-reason">Analyzing data...</p>
+                            
+                            <div class="decision-stats">
+                                <div class="decision-stat-item">
+                                    <span class="decision-stat-label">Current Avg Price</span>
+                                    <span id="decision-price" class="decision-stat-value">₹ --</span>
+                                </div>
+                                <div class="decision-stat-item">
+                                    <span class="decision-stat-label">Positive Sentiment</span>
+                                    <span id="decision-ratio" class="decision-stat-value">--%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right: Sentiment Chart & Subscribe -->
+                        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                            <div class="card sentiment-chart-container">
+                                <div class="card-header" style="margin-bottom: 1rem;">
+                                    <i data-lucide="pie-chart" class="header-icon"></i>
+                                    <div>
+                                        <h3 style="font-size: 1.1rem;">Customer Sentiment</h3>
+                                    </div>
+                                </div>
+                                <div class="sentiment-canvas-wrapper">
+                                    <canvas id="sentiment-chart"></canvas>
+                                </div>
+                            </div>
+
+                            <div class="card form-card" style="padding: 1.5rem;">
+                                <h4>Price Drop Alerts</h4>
+                                <p class="text-muted" style="margin-bottom: 1rem; font-size: 0.85rem;">Subscribe to get notified when the model predicts a good time to buy.</p>
+                                <div class="input-group" style="margin-bottom: 1rem;">
+                                    <input type="email" id="alert-email" placeholder="Your email address" required>
+                                </div>
+                                <button id="subscribe-alert-btn" class="btn btn-outline" style="width: 100%;">
+                                    <i data-lucide="bell"></i> Subscribe
+                                </button>
+                                <div id="subscribe-status" class="status-msg hidden" style="margin-top: 1rem; margin-bottom: 0;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ═══════════ Sentiment Analysis Section ═══════════ -->
+                <section id="sentiment-section" class="hidden">
+                    <div class="card form-card">
+                        <div class="card-header">
+                            <i data-lucide="message-square" class="header-icon"></i>
+                            <div>
+                                <h3>Sentiment Analyzer</h3>
+                                <p class="text-muted">Upload a CSV or Excel file containing reviews to view sentiment metrics.</p>
+                            </div>
+                        </div>
+
+                        <div class="forecast-controls">
+                            <div class="control-group">
+                                <label for="sentiment-product-select">Select Product</label>
+                                <select id="sentiment-product-select">
+                                    <option value="">— select product —</option>
+                                </select>
+                            </div>
+                            <div class="control-group control-action" style="grid-column: span 3; display: flex; align-items: flex-end;">
+                                <button id="run-sentiment-btn" class="btn btn-primary btn-lg">
+                                    <i data-lucide="bar-chart-2"></i> Analyze
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="sentiment-loading" class="status-container hidden">
+                            <div class="spinner"></div>
+                            <p>Analyzing text sentiment... This may take a moment.</p>
+                        </div>
+                    </div>
+
+                    <div id="sentiment-results" class="hidden" style="margin-top: 2rem;">
+                        <h3 style="margin-bottom: 1.5rem;">Analysis Results <span id="sentiment-total-count" style="font-size: 1rem; color: var(--text-muted); font-weight: normal;"></span></h3>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                            <!-- Sentiment Pie Chart -->
+                            <div class="card sentiment-chart-container">
+                                <div class="card-header" style="margin-bottom: 1rem;">
+                                    <i data-lucide="pie-chart" class="header-icon"></i>
+                                    <div>
+                                        <h3 style="font-size: 1.1rem;">Overall Sentiment</h3>
+                                    </div>
+                                </div>
+                                <div class="sentiment-canvas-wrapper" style="min-height: 250px;">
+                                    <canvas id="standalone-sentiment-chart"></canvas>
+                                </div>
+                            </div>
+
+                            <!-- Category Bar Chart -->
+                            <div class="card sentiment-chart-container">
+                                <div class="card-header" style="margin-bottom: 1rem;">
+                                    <i data-lucide="bar-chart" class="header-icon"></i>
+                                    <div>
+                                        <h3 style="font-size: 1.1rem;">Category Distribution</h3>
+                                    </div>
+                                </div>
+                                <div class="sentiment-canvas-wrapper" style="min-height: 250px;">
+                                    <canvas id="category-bar-chart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sample Reviews List -->
+                        <div class="card">
+                            <div class="card-header" style="margin-bottom: 1rem;">
+                                <i data-lucide="list" class="header-icon"></i>
+                                <div>
+                                    <h3 style="font-size: 1.1rem;">Sample Analyzed Reviews</h3>
+                                </div>
+                            </div>
+                            <div class="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 15%">Sentiment</th>
+                                            <th style="width: 15%">Category</th>
+                                            <th>Review Text</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="sentiment-samples-body">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ═══════════ Flipkart Scraper Section ═══════════ -->
+                <section id="scraper-section" class="card form-card hidden">
                     <div class="card-header">
                         <i data-lucide="zap" class="header-icon"></i>
                         <div>
-                            <h3 id="form-title">Amazon Price History Scraper</h3>
-                            <p id="form-desc" class="text-muted">Enter a PriceHistoryApp URL for an Amazon product to scrape historical pricing data.</p>
+                            <h3 id="form-title">Flipkart Price History Scraper</h3>
+                            <p id="form-desc" class="text-muted">Enter a PriceHistory.app URL for a Flipkart product.</p>
                         </div>
                     </div>
                     
                     <form id="scraper-form" class="scraper-form">
-                        <!-- Dynamic inputs injected by JS -->
-                        <div id="dynamic-inputs" class="input-group">
-                            <label for="url-input">PriceHistoryApp URL</label>
-                            <input type="url" id="url-input" placeholder="https://pricehistoryapp.com/product/..." required>
-                        </div>
-                        
+                        <div id="dynamic-inputs" class="input-group"></div>
                         <div class="form-actions">
                             <button type="submit" id="run-btn" class="btn btn-primary">
                                 <i data-lucide="play"></i> 
@@ -79,15 +355,14 @@
                         </div>
                     </form>
 
-                    <!-- Loading / Status State -->
                     <div id="status-container" class="status-container hidden">
                         <div class="spinner"></div>
                         <p id="status-text">Initializing scraper...</p>
-                        <p class="status-subtext">This may take up to 60 seconds depending on the anti-bot measures.</p>
+                        <p class="status-subtext">This may take up to 60 seconds.</p>
                     </div>
                 </section>
 
-                <!-- Data Viewer Section -->
+                <!-- ═══════════ Database Section ═══════════ -->
                 <section class="card data-card hidden" id="data-section">
                     <div class="card-header flex-between">
                         <div class="header-left">
@@ -119,7 +394,6 @@
                                 </tr>
                             </thead>
                             <tbody id="data-table-body">
-                                <!-- Data rows injected here -->
                                 <tr><td colspan="5" class="text-center py-4">Loading data...</td></tr>
                             </tbody>
                         </table>
