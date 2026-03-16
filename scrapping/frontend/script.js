@@ -17,6 +17,82 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const allSections = [forecastSection, metricsSection, scraperSection, dataSection, decisionSection, sentimentSection];
 
+    // Theme Toggle
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const iconSun = document.getElementById('icon-sun');
+    const iconMoon = document.getElementById('icon-moon');
+    
+    function initTheme() {
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        if (savedTheme === 'light') {
+            document.documentElement.setAttribute('data-theme', 'light');
+            iconSun.classList.add('hidden');
+            iconMoon.classList.remove('hidden');
+        } else {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            iconSun.classList.remove('hidden');
+            iconMoon.classList.add('hidden');
+        }
+    }
+
+    function toggleTheme() {
+        const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+        if (currentTheme === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'light');
+            localStorage.setItem('theme', 'light');
+            iconSun.classList.add('hidden');
+            iconMoon.classList.remove('hidden');
+        } else {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            localStorage.setItem('theme', 'dark');
+            iconSun.classList.remove('hidden');
+            iconMoon.classList.add('hidden');
+        }
+        refreshChartsForTheme();
+    }
+
+    function refreshChartsForTheme() {
+        const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+        const gridColor = isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.04)';
+        const textColor = isLight ? '#6b7280' : '#a0a0b0'; // text-muted
+        const titleColor = isLight ? '#111827' : '#f8f9fa'; // text-main
+        const tBgColor = isLight ? 'rgba(255, 255, 255, 0.95)' : 'rgba(20, 20, 29, 0.95)';
+        
+        if (forecastChart) {
+            forecastChart.options.scales.x.ticks.color = textColor;
+            forecastChart.options.scales.y.ticks.color = textColor;
+            forecastChart.options.scales.x.grid.color = gridColor;
+            forecastChart.options.scales.y.grid.color = gridColor;
+            forecastChart.options.plugins.legend.labels.color = textColor;
+            forecastChart.options.plugins.tooltip.backgroundColor = tBgColor;
+            forecastChart.options.plugins.tooltip.titleColor = titleColor;
+            forecastChart.options.plugins.tooltip.bodyColor = textColor;
+            forecastChart.update('none');
+        }
+        if (sentimentChart) {
+            sentimentChart.data.datasets[0].borderColor = getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim();
+            sentimentChart.options.plugins.legend.labels.color = titleColor;
+            sentimentChart.options.plugins.tooltip.backgroundColor = tBgColor;
+            sentimentChart.options.plugins.tooltip.titleColor = titleColor;
+            sentimentChart.options.plugins.tooltip.bodyColor = textColor;
+            sentimentChart.update('none');
+        }
+        if (standaloneSentimentChart) {
+            standaloneSentimentChart.data.datasets[0].borderColor = getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim();
+            standaloneSentimentChart.options.plugins.legend.labels.color = titleColor;
+            standaloneSentimentChart.update('none');
+        }
+        if (categoryBarChart) {
+            categoryBarChart.options.scales.x.ticks.color = textColor;
+            categoryBarChart.options.scales.y.ticks.color = textColor;
+            categoryBarChart.options.scales.y.grid.color = gridColor;
+            categoryBarChart.update('none');
+        }
+    }
+
+    themeToggleBtn.addEventListener('click', toggleTheme);
+    initTheme();
+
     // Forecast
     const productSelect = document.getElementById('product-select');
     const modelSelect = document.getElementById('model-select');

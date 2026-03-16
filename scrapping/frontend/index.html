@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Price Forecasting Dashboard</title>
     <meta name="description" content="AI-powered price forecasting using Prophet and Chronos models. Predict future prices and find the best time to buy.">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=2">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -59,7 +59,11 @@
                 <div class="breadcrumbs">
                     <span>Dashboard</span> <i data-lucide="chevron-right" class="breadcrumb-icon"></i> <span id="current-tab-name">Price Forecast</span>
                 </div>
-                <div class="user-profile">
+                <div class="user-profile" style="display: flex; align-items: center; gap: 1rem;">
+                    <button id="theme-toggle" class="btn btn-outline" style="padding: 0.5rem; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;" aria-label="Toggle Theme">
+                        <span id="icon-sun" class="theme-icon-span"><i data-lucide="sun" style="width: 18px; height: 18px;"></i></span>
+                        <span id="icon-moon" class="theme-icon-span hidden"><i data-lucide="moon" style="width: 18px; height: 18px;"></i></span>
+                    </button>
                     <div class="avatar">Admin</div>
                 </div>
             </header>
@@ -405,7 +409,7 @@
         </main>
     </div>
 
-    <script src="script.js"></script>
+    <script src="script.js?v=2"></script>
     <script>lucide.createIcons();</script>
 </body>
 </html>
