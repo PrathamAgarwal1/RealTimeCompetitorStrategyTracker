@@ -1,129 +1,90 @@
-import os
-import re
-import json
+import logging
+from fastapi import APIRouter, HTTPException, Depends
+from typing import List, Dict, Any, Optional
 import glob
-
-from fastapi import FastAPI, HTTPException
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
-from pydantic import BaseModel
-from typing import Optional
+import os
+import sqlite3
 import pandas as pd
-from dotenv import load_dotenv
+import json
+from fastapi.responses import FileResponse
 
-from .database import save_data, load_data
-from .decision import get_product_reviews, make_decision
-from .scraper.flipkart_price import fetch_flipkart_price_history
-from .scraper.flipkart_reviews import fetch_flipkart_reviews
-from .scraper.sentiment import analyze_reviews
-from .scraper.notifier import subscribe_user
+from ..models.schemas import ScrapeRequest, ForecastRequest, SentimentRequest, DecisionRequest, SubscribeRequest
+from ..database.sqlite import save_data, load_data
+from ..services.decision_service import get_product_reviews, make_decision
+from ..services.scraper.flipkart_price import fetch_flipkart_price_history
+from ..services.scraper.flipkart_reviews import fetch_flipkart_reviews
+from ..services.scraper.sentiment import analyze_reviews
+from ..services.scraper.notifier import subscribe_user
+from ..services.forecasting.data_handler import list_products, load_product_price_data
+from ..services.forecasting.prophet_model import run_prophet_forecast
+from ..services.forecasting.chronos_model import run_chronos_forecast
+from ..config import settings
 
-from .forecasting.data_handler import list_products, load_product_price_data
-from .forecasting.prophet_model import run_prophet_forecast
-from .forecasting.chronos_model import run_chronos_forecast
+logger = logging.getLogger(__name__)
 
-# Load .env from parent directory
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-ENV_PATH = os.path.join(BASE_DIR, ".env")
-load_dotenv(ENV_PATH)
+router = APIRouter()
 
-app = FastAPI(title="Price Forecasting Dashboard")
-
-# Ensure paths
-DATA_DIR = os.path.join(BASE_DIR, "data")
-os.makedirs(DATA_DIR, exist_ok=True)
-FRONTEND_DIR = os.path.join(os.path.dirname(__file__), "..", "frontend")
-os.makedirs(FRONTEND_DIR, exist_ok=True)
-
-
-# ── Request Models ─────────────────────────────────────────────
-
-class ScrapeRequest(BaseModel):
-    query: Optional[str] = None
-    url: Optional[str] = None
-
-class ForecastRequest(BaseModel):
-    product_name: str
-    model: str = "both"
-    periods: int = 30
-
-class SentimentRequest(BaseModel):
-    product_name: str
-
-class DecisionRequest(BaseModel):
-    product_name: str
-
-class SubscribeRequest(BaseModel):
-    email: str
-    product_name: str
-    target_price: float
-
+# ── API ROUTES ────────────────────────────────────────────────
 
 # ── Flipkart Scrapers ─────────────────────────────────────────
-
-@app.post("/api/scrape/flipkart-price")
+@router.post("/scrape/flipkart-price")
 async def api_scrape_flipkart_price(req: ScrapeRequest):
     if not req.url:
         raise HTTPException(status_code=400, detail="Missing url")
+    logger.info(f"Scraping Flipkart price history from: {req.url}")
     result = fetch_flipkart_price_history(req.url)
     if result["success"]:
         save_data(result["data"])
     return result
 
-
-@app.post("/api/scrape/flipkart-reviews")
+@router.post("/scrape/flipkart-reviews")
 async def api_scrape_flipkart_reviews(req: ScrapeRequest):
     if not req.query:
         raise HTTPException(status_code=400, detail="Missing query")
+    logger.info(f"Scraping Flipkart reviews for query: {req.query}")
     result = fetch_flipkart_reviews(req.query)
     if result["success"]:
         save_data(result["data"])
     return result
 
-
 # ── Database ───────────────────────────────────────────────────
-
-@app.get("/api/data")
+@router.get("/data")
 async def get_all_data():
     data = load_data()
     return {"success": True, "count": len(data), "data": data}
 
-
-# ── Data Files Viewer (NEW) ───────────────────────────────────
-
-@app.get("/api/datafiles")
+@router.get("/datafiles")
 async def list_data_files():
-    """List all CSV/XLSX/SQLite files in the data/ directory."""
     files = []
     for ext in ("*.csv", "*.xlsx", "*.json", "*.sqlite", "*.db"):
-        for fpath in glob.glob(os.path.join(DATA_DIR, "**", ext), recursive=True):
+        for fpath in glob.glob(os.path.join(settings.DATA_DIR, "**", ext), recursive=True):
             stat = os.stat(fpath)
             files.append({
                 "name": os.path.basename(fpath),
-                "path": os.path.relpath(fpath, DATA_DIR).replace("\\", "/"),
+                "path": os.path.relpath(fpath, settings.DATA_DIR).replace("\\", "/"),
                 "size": stat.st_size,
                 "modified": stat.st_mtime,
             })
     files.sort(key=lambda f: f["modified"], reverse=True)
     return {"success": True, "files": files}
 
-
-@app.get("/api/datafiles/preview")
+@router.get("/datafiles/preview")
 async def preview_data_file(path: str, page: int = 1, page_size: int = 50, search: str = ""):
     """Preview contents of a data file with pagination and search."""
-    full_path = os.path.normpath(os.path.join(DATA_DIR, path))
+    full_path = os.path.normpath(os.path.join(settings.DATA_DIR, path))
+    logger.info(f"Previewing file: {full_path}")
 
-    if not full_path.startswith(os.path.normpath(DATA_DIR)):
+    if not full_path.startswith(os.path.normpath(settings.DATA_DIR)):
         raise HTTPException(status_code=403, detail="Access denied")
     if not os.path.exists(full_path):
+        logger.error(f"File not found: {full_path}")
         raise HTTPException(status_code=404, detail="File not found")
 
     try:
         ext = os.path.splitext(full_path)[1].lower()
         
-        # Native SQLite fast path (bypasses loading full dataset into memory)
+        # Native SQLite fast path
         if ext in (".sqlite", ".db"):
-            import sqlite3
             con = sqlite3.connect(full_path)
             
             # Find the first user table dynamically
@@ -132,12 +93,13 @@ async def preview_data_file(path: str, page: int = 1, page_size: int = 50, searc
                 con.close()
                 return {"success": True, "columns": [], "rows": [], "total_rows": 0, "page": 1, "page_size": page_size, "total_pages": 1}
             table_name = table_df.iloc[0]["name"]
+            logger.info(f"Previewing table: {table_name}")
             
             # Search filter
             where_clause = ""
             params = []
             if search:
-                # Basic search across primary text columns
+                # Basic search across known columns
                 where_clause = " WHERE product_name LIKE ? OR review_text LIKE ? OR source LIKE ?"
                 search_term = f"%{search}%"
                 params = [search_term, search_term, search_term]
@@ -155,11 +117,11 @@ async def preview_data_file(path: str, page: int = 1, page_size: int = 50, searc
             df = pd.read_sql(query, con, params=params)
             con.close()
             
-            # SQLite safe types conversion
+            # JSON serialization fix for numpy types
             records = json.loads(df.to_json(orient="records"))
             
         else:
-            # Slower path for legacy flat files
+            # Slower path for flat files
             if ext == ".csv":
                 df = pd.read_csv(full_path)
             elif ext == ".xlsx":
@@ -182,6 +144,7 @@ async def preview_data_file(path: str, page: int = 1, page_size: int = 50, searc
             page_df = df.iloc[start:end]
             records = json.loads(page_df.to_json(orient="records"))
 
+        logger.info(f"Successfully fetched {len(records)} rows from {full_path} (Total rows: {total_rows})")
         return {
             "success": True,
             "columns": list(df.columns),
@@ -193,46 +156,28 @@ async def preview_data_file(path: str, page: int = 1, page_size: int = 50, searc
         }
 
     except Exception as e:
+        logger.error(f"Failed to read file {full_path}: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to read file: {str(e)}")
 
-
-@app.get("/api/datafiles/download")
+@router.get("/datafiles/download")
 async def download_data_file(path: str):
     """Download a data file."""
-    full_path = os.path.normpath(os.path.join(DATA_DIR, path))
-    if not full_path.startswith(os.path.normpath(DATA_DIR)):
+    full_path = os.path.normpath(os.path.join(settings.DATA_DIR, path))
+    if not full_path.startswith(os.path.normpath(settings.DATA_DIR)):
         raise HTTPException(status_code=403, detail="Access denied")
     if not os.path.exists(full_path):
         raise HTTPException(status_code=404, detail="File not found")
     return FileResponse(full_path, filename=os.path.basename(full_path))
 
-
 # ── Forecasting ────────────────────────────────────────────────
-
-@app.get("/api/products")
+@router.get("/products")
 async def api_list_products():
     products = list_products()
     return {"success": True, "products": products}
 
-
-@app.get("/api/historical/{product_name}")
-async def api_get_historical(product_name: str):
-    df = load_product_price_data(product_name)
-    if df is None:
-        raise HTTPException(status_code=404, detail="Product not found or has no price data.")
-
-    data = []
-    for _, row in df.iterrows():
-        price_val = float(row["y"])
-        data.append({
-            "date": row["ds"].strftime("%Y-%m-%d"),
-            "price": float(f"{price_val:.2f}"),
-        })
-    return {"success": True, "count": len(data), "data": data}
-
-
-@app.post("/api/forecast")
+@router.post("/forecast")
 async def api_run_forecast(req: ForecastRequest):
+    logger.info(f"Running {req.model} forecast for {req.product_name}")
     df = load_product_price_data(req.product_name)
     if df is None:
         raise HTTPException(status_code=404, detail="Product not found or has no price data.")
@@ -254,40 +199,28 @@ async def api_run_forecast(req: ForecastRequest):
         results["chronos"] = run_chronos_forecast(df, periods=req.periods)
     return {"success": True, **results}
 
-
-# ── Sentiment ──────────────────────────────────────────────────
-
-@app.post("/api/sentiment/analyze")
+# ── Sentiment & Decision ───────────────────────────────────────
+@router.post("/sentiment/analyze")
 async def api_analyze_sentiment(req: SentimentRequest):
+    logger.info(f"Analyzing sentiment for product: {req.product_name}")
     all_data = load_data()
     product_reviews = get_product_reviews(all_data, req.product_name)
 
     if not product_reviews:
-        raise HTTPException(status_code=404, detail="No reviews found for this product in the database.")
+        raise HTTPException(status_code=404, detail="No reviews found for this product.")
 
-    product_reviews = product_reviews[:100]
-    analyzed = analyze_reviews(product_reviews)
-
-    sentiment_counts = {"Positive": 0, "Neutral": 0, "Negative": 0}
-    category_counts = {}
-    for r in analyzed:
-        sentiment_counts[r.get("sentiment", "Neutral")] += 1
-        cat = r.get("category", "General")
-        category_counts[cat] = category_counts.get(cat, 0) + 1
-
+    results = analyze_reviews(product_reviews[:100])
     return {
         "success": True,
-        "total_analyzed": len(analyzed),
-        "sentiment_distribution": sentiment_counts,
-        "category_distribution": category_counts,
-        "sample_reviews": analyzed[:10],
+        "total_analyzed": results["total_analyzed"],
+        "sentiment_distribution": results["sentiment_distribution"],
+        "category_distribution": results["category_distribution"],
+        "sample_reviews": results["reviews"][:10],
     }
 
-
-# ── Decision & Alerts ──────────────────────────────────────────
-
-@app.post("/api/decision")
+@router.post("/decision")
 async def api_get_decision(req: DecisionRequest):
+    logger.info(f"Getting purchase decision for product: {req.product_name}")
     all_data = load_data()
     product_reviews = get_product_reviews(all_data, req.product_name)
     product_prices = load_product_price_data(req.product_name)
@@ -295,17 +228,4 @@ async def api_get_decision(req: DecisionRequest):
     if not product_reviews and product_prices is None:
         raise HTTPException(status_code=404, detail="No data found for this product.")
 
-    product_reviews = product_reviews[:100]
-    return make_decision(req.product_name, product_prices, product_reviews)
-
-
-@app.post("/api/subscribe")
-async def api_subscribe_alerts(req: SubscribeRequest):
-    success = subscribe_user(req.email, req.product_name, req.target_price)
-    if success:
-        return {"success": True, "message": "Successfully subscribed to alerts."}
-    raise HTTPException(status_code=500, detail="Failed to subscribe.")
-
-
-# Mount static files at the root (MUST be last)
-app.mount("/", StaticFiles(directory=FRONTEND_DIR, html=True), name="frontend")
+    return make_decision(req.product_name, product_prices, product_reviews[:100])

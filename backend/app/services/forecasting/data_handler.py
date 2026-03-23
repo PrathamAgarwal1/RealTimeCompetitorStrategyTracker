@@ -1,11 +1,14 @@
 import os
 import sqlite3
 import pandas as pd
-import numpy as np
+import logging
+from ...config import settings
 
-from ..database import DB_PATH
+logger = logging.getLogger(__name__)
 
-DATA_DIR = os.path.dirname(DB_PATH)
+# Path definition from settings
+DB_PATH = os.path.join(settings.DATA_DIR, "database.sqlite")
+DATA_DIR = settings.DATA_DIR
 
 def ensure_data_dir():
     os.makedirs(DATA_DIR, exist_ok=True)
@@ -27,7 +30,7 @@ def list_products() -> list[str]:
             
         return sorted(df['product_name'].tolist())
     except Exception as e:
-        print(f"Error listing products: {e}")
+        logger.error(f"Error listing products: {e}")
         return []
 
 def load_product_price_data(product_name: str) -> pd.DataFrame | None:
@@ -67,5 +70,5 @@ def load_product_price_data(product_name: str) -> pd.DataFrame | None:
         return df_forecast
         
     except Exception as e:
-        print(f"Error loading price data: {e}")
+        logger.error(f"Error loading price data for {product_name}: {e}")
         return None

@@ -4,6 +4,11 @@ import smtplib
 from email.message import EmailMessage
 from pathlib import Path
 
+import logging
+from ...config import settings
+
+logger = logging.getLogger(__name__)
+
 # ====================== CONFIG ======================
 EMAIL_SENDER = os.getenv("EMAIL_SENDER")
 EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
@@ -12,7 +17,7 @@ EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
 # Default to true only if credentials exist
 ENABLE_EMAILS = bool(EMAIL_SENDER and EMAIL_PASSWORD)
 
-DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data")
+DATA_DIR = settings.DATA_DIR
 ALERTS_FILE = os.path.join(DATA_DIR, "alerts.json")
 
 

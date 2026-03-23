@@ -118,11 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const statusText = document.getElementById('status-text');
     const statusSpinner = document.querySelector('.spinner');
 
-    // Database
-    // Database
-    const dataTableBody = document.getElementById('data-table-body');
-    const refreshBtn = document.getElementById('refresh-db-btn');
-    const downloadBtn = document.getElementById('download-csv-btn');
+    // Database / File Explorer — DOM refs are in the file explorer section below
 
     // Decision & Alerts
     const decisionProductSelect = document.getElementById('decision-product-select');
@@ -193,7 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
             renderMetrics();
         } else if (tabId === 'database') {
             dataSection.classList.remove('hidden');
-            fetchData();
+            loadFileList();
         } else if (tabId === 'decision') {
             decisionSection.classList.remove('hidden');
             populateProductSelect(decisionProductSelect);
@@ -712,13 +708,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await res.json();
 
             if (data.success) {
-                sentimentTotalCount.textContent = `(Analyzed ${data.total_analyzed} reviews)`;
+                sentimentTotalCount.textContent = `(Analyzed ${data.total_analyzed || 0} reviews)`;
                 
                 // Render Pie Chart
-                renderStandaloneSentimentChart(data.sentiment_distribution);
+                renderStandaloneSentimentChart(data.sentiment_distribution || { Positive: 0, Neutral: 0, Negative: 0 });
                 
                 // Render Bar Chart
-                renderCategoryChart(data.category_distribution);
+                renderCategoryChart(data.category_distribution || {});
                 
                 // Render Sample Table
                 sentimentSamplesBody.innerHTML = '';
@@ -758,7 +754,7 @@ document.addEventListener('DOMContentLoaded', () => {
             data: {
                 labels: ['Positive', 'Neutral', 'Negative'],
                 datasets: [{
-                    data: [dist.Positive, dist.Neutral, dist.Negative],
+                    data: [dist?.Positive || 0, dist?.Neutral || 0, dist?.Negative || 0],
                     backgroundColor: [
                         'rgba(16, 185, 129, 0.8)',
                         'rgba(245, 158, 11, 0.8)',
@@ -782,8 +778,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const ctx = document.getElementById('category-bar-chart').getContext('2d');
         if (categoryBarChart) categoryBarChart.destroy();
 
-        const labels = Object.keys(catDist);
-        const data = Object.values(catDist);
+        const labels = Object.keys(catDist || {});
+        const data = Object.values(catDist || {});
 
         categoryBarChart = new Chart(ctx, {
             type: 'bar',
@@ -874,71 +870,211 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // ── Database / Table Logic ────────────────────────────────
-    async function fetchData() {
-        dataTableBody.innerHTML = '<tr><td colspan="5" class="text-center py-4">Loading data from backend...</td></tr>';
+    // ── Data File Explorer ─────────────────────────────────────
+    const fileSelect = document.getElementById('file-select');
+    const refreshFilesBtn = document.getElementById('refresh-files-btn');
+    const downloadFileBtn = document.getElementById('download-file-btn');
+    const fileInfo = document.getElementById('file-info');
+    const filePreviewCard = document.getElementById('file-preview-card');
+    const filePreviewLoading = document.getElementById('file-preview-loading');
+    const filePreviewThead = document.getElementById('file-preview-thead');
+    const filePreviewTbody = document.getElementById('file-preview-tbody');
+    const fileSearch = document.getElementById('file-search');
+    const filePagination = document.getElementById('file-pagination');
+    const pageInfo = document.getElementById('page-info');
+    const pagePrev = document.getElementById('page-prev');
+    const pageNext = document.getElementById('page-next');
+
+    let currentFilePath = '';
+    let currentPage = 1;
+    let currentSearch = '';
+    let fileListCache = [];
+    let searchDebounce = null;
+
+    function formatFileSize(bytes) {
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+        return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
+    async function loadFileList() {
         try {
-            const response = await fetch('/api/data');
-            const data = await response.json();
-            if (data.success && data.data && data.data.length > 0) {
-                renderTable(data.data.slice().reverse());
+            const res = await fetch('/api/datafiles');
+            const data = await res.json();
+            fileListCache = data.files || [];
+
+            fileSelect.innerHTML = '<option value="">— choose a file —</option>';
+            fileListCache.forEach(f => {
+                const opt = document.createElement('option');
+                opt.value = f.path;
+                const date = new Date(f.modified * 1000).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+                opt.textContent = `${f.name}  (${formatFileSize(f.size)}, ${date})`;
+                fileSelect.appendChild(opt);
+            });
+
+            // Re-select current file if still available
+            if (currentFilePath && fileListCache.some(f => f.path === currentFilePath)) {
+                fileSelect.value = currentFilePath;
+            }
+        } catch (err) {
+            console.error('Failed to load file list:', err);
+        }
+    }
+
+    async function loadFilePreview(path, page = 1, search = '') {
+        if (!path) return;
+
+        currentFilePath = path;
+        currentPage = page;
+        currentSearch = search;
+
+        filePreviewCard.classList.remove('hidden');
+        filePreviewLoading.classList.remove('hidden');
+        downloadFileBtn.disabled = false;
+
+        // Show file info
+        const fileMeta = fileListCache.find(f => f.path === path);
+        if (fileMeta) {
+            fileInfo.classList.remove('hidden');
+            document.getElementById('info-filename').textContent = fileMeta.name;
+            document.getElementById('info-size').textContent = formatFileSize(fileMeta.size);
+        }
+
+        try {
+            const params = new URLSearchParams({ path, page, page_size: 50 });
+            if (search) params.set('search', search);
+
+            const res = await fetch(`/api/datafiles/preview?${params}`);
+            const data = await res.json();
+
+            if (!data.success) {
+                filePreviewTbody.innerHTML = `<tr><td class="text-center py-4 error-text">${data.detail || 'Failed to load file.'}</td></tr>`;
+                filePreviewLoading.classList.add('hidden');
+                return;
+            }
+
+            // Update info cards
+            document.getElementById('info-rows').textContent = data.total_rows.toLocaleString();
+            document.getElementById('info-cols').textContent = data.columns.length;
+
+            // Render table header
+            const headerRow = document.createElement('tr');
+            headerRow.innerHTML = '<th style="width:40px;color:var(--text-muted);font-weight:400;">#</th>';
+            data.columns.forEach(col => {
+                const th = document.createElement('th');
+                th.textContent = col;
+                headerRow.appendChild(th);
+            });
+            filePreviewThead.innerHTML = '';
+            filePreviewThead.appendChild(headerRow);
+
+            // Render table body
+            filePreviewTbody.innerHTML = '';
+            if (data.rows.length === 0) {
+                const colSpan = data.columns.length + 1;
+                filePreviewTbody.innerHTML = `<tr><td colspan="${colSpan}" class="text-center py-4 text-muted">${search ? 'No rows match your search.' : 'This file is empty.'}</td></tr>`;
             } else {
-                dataTableBody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-muted">No data found. Run a scraper first.</td></tr>';
+                const startIdx = (data.page - 1) * data.page_size;
+                data.rows.forEach((row, idx) => {
+                    const tr = document.createElement('tr');
+                    // Row number
+                    const numTd = document.createElement('td');
+                    numTd.style.color = 'var(--text-muted)';
+                    numTd.style.fontSize = '0.8rem';
+                    numTd.textContent = startIdx + idx + 1;
+                    tr.appendChild(numTd);
+
+                    data.columns.forEach(col => {
+                        const td = document.createElement('td');
+                        let val = row[col];
+                        if (val === null || val === undefined) {
+                            td.textContent = '—';
+                            td.style.color = 'var(--text-muted)';
+                        } else {
+                            const strVal = String(val);
+                            // Truncate long values
+                            if (strVal.length > 120) {
+                                td.textContent = strVal.slice(0, 120) + '…';
+                                td.title = strVal;
+                            } else {
+                                td.textContent = strVal;
+                            }
+                            // Color price values
+                            if (col.toLowerCase().includes('price') && !isNaN(val)) {
+                                td.style.color = '#10b981';
+                                td.style.fontWeight = '600';
+                                td.textContent = '₹' + Number(val).toLocaleString();
+                            }
+                        }
+                        tr.appendChild(td);
+                    });
+                    filePreviewTbody.appendChild(tr);
+                });
             }
-        } catch (error) {
-            dataTableBody.innerHTML = `<tr><td colspan="5" class="text-center py-4 error-text">Error loading data: ${error.message}</td></tr>`;
+
+            // Update subtitle
+            const subtitle = document.getElementById('preview-subtitle');
+            if (search) {
+                subtitle.textContent = `${data.total_rows} results for "${search}" — Page ${data.page} of ${data.total_pages}`;
+            } else {
+                subtitle.textContent = `Showing page ${data.page} of ${data.total_pages} (${data.total_rows} total rows)`;
+            }
+
+            // Pagination
+            filePagination.classList.remove('hidden');
+            filePagination.style.display = 'flex';
+            pageInfo.textContent = `Page ${data.page} of ${data.total_pages}`;
+            pagePrev.disabled = data.page <= 1;
+            pageNext.disabled = data.page >= data.total_pages;
+
+            lucide.createIcons();
+        } catch (err) {
+            filePreviewTbody.innerHTML = `<tr><td class="text-center py-4 error-text">Error: ${err.message}</td></tr>`;
         }
+
+        filePreviewLoading.classList.add('hidden');
     }
 
-    function renderTable(dataArray) {
-        dataTableBody.innerHTML = '';
-        const previewData = dataArray.slice(0, 100);
-
-        previewData.forEach(row => {
-            const tr = document.createElement('tr');
-            let niceDate = row.timestamp;
-            try { if (row.timestamp) niceDate = new Date(row.timestamp).toLocaleString(); } catch {}
-
-            let badgeClass = 'badge-flipkart';
-            let sourceLabel = (row.source || 'unknown').replace(/_/g, ' ');
-
-            let ratingPrice = '-';
-            if (row.price !== null && row.price !== undefined) {
-                ratingPrice = `<span style="color:#10b981; font-weight:600">₹${row.price}</span>`;
-            } else if (row.rating) {
-                ratingPrice = '★ ' + row.rating;
-            }
-
-            let reviewContent = '-';
-            if (row.review_text) {
-                reviewContent = `<div class="review-cell" title="${row.review_text.replace(/"/g, '&quot;')}">${row.review_text}</div>`;
-            } else if (row.url) {
-                reviewContent = `<a href="${row.url}" target="_blank" style="color:var(--accent-primary);text-decoration:none" class="truncate d-block" style="max-width:200px">${row.url}</a>`;
-            }
-
-            tr.innerHTML = `
-                <td>${niceDate}</td>
-                <td><span class="badge ${badgeClass}">${sourceLabel}</span></td>
-                <td class="truncate" title="${row.product_name}">${row.product_name || 'N/A'}</td>
-                <td>${ratingPrice}</td>
-                <td>${reviewContent}</td>
-            `;
-            dataTableBody.appendChild(tr);
-        });
-
-        if (dataArray.length > 100) {
-            const t = document.createElement('tr');
-            t.innerHTML = `<td colspan="5" class="text-center text-muted" style="padding:1rem">+ ${dataArray.length - 100} more rows hidden in preview. Download CSV to export full dataset.</td>`;
-            dataTableBody.appendChild(t);
+    fileSelect.addEventListener('change', () => {
+        const path = fileSelect.value;
+        currentSearch = '';
+        fileSearch.value = '';
+        if (path) {
+            loadFilePreview(path, 1);
+        } else {
+            filePreviewCard.classList.add('hidden');
+            fileInfo.classList.add('hidden');
+            downloadFileBtn.disabled = true;
         }
-    }
-
-    refreshBtn.addEventListener('click', fetchData);
-    downloadBtn.addEventListener('click', () => {
-        window.location.href = '/data/raw_data.csv';
     });
 
-    // Init
+    refreshFilesBtn.addEventListener('click', () => {
+        loadFileList();
+        if (currentFilePath) loadFilePreview(currentFilePath, currentPage, currentSearch);
+    });
+
+    downloadFileBtn.addEventListener('click', () => {
+        if (currentFilePath) {
+            window.location.href = `/api/datafiles/download?path=${encodeURIComponent(currentFilePath)}`;
+        }
+    });
+
+    fileSearch.addEventListener('input', () => {
+        clearTimeout(searchDebounce);
+        searchDebounce = setTimeout(() => {
+            loadFilePreview(currentFilePath, 1, fileSearch.value.trim());
+        }, 400);
+    });
+
+    pagePrev.addEventListener('click', () => {
+        if (currentPage > 1) loadFilePreview(currentFilePath, currentPage - 1, currentSearch);
+    });
+
+    pageNext.addEventListener('click', () => {
+        loadFilePreview(currentFilePath, currentPage + 1, currentSearch);
+    });
+
+    // ── Init ──────────────────────────────────────────────────
     currentTab = 'forecast';
     showSection('forecast');
     document.getElementById('nav-forecast').classList.add('active');

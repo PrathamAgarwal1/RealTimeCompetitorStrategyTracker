@@ -1,91 +1,94 @@
-# RealTimeCompetitorStrategyTracker
+# ForecastPro - AI-Driven E-Commerce Dashboard
 
-# AI-Driven Decision Support Dashboard for E-Commerce
+ForecastPro is an AI-driven decision support dashboard that provides price forecasting, sentiment analysis, and purchasing recommendations for e-commerce products.
 
-## Introduction
-E-commerce platforms generate large volumes of product pricing data and customer reviews over time. 
-However, converting this data into meaningful and actionable insights for decision-making remains a challenge. 
-Most traditional dashboards focus on raw statistics without providing intelligent interpretation or contextual understanding.
+## 🏗️ Architecture
+```mermaid
+graph TD
+    User((User)) -->|Browser| Frontend[Frontend UI /static]
+    Frontend -->|API Requests| FastAPI[FastAPI Backend]
+    
+    subgraph "FastAPI Backend"
+        FastAPI --> Routes[API Routes]
+        Routes --> Services[Service Layer]
+        Services --> Scrapers[Scrapers: Flipkart]
+        Services --> Forecasting[Models: Prophet/Chronos]
+        Services --> LLM[Sentiment: Groq/Llama3]
+        Services --> DB_Handler[Database Handler]
+    end
+    
+    DB_Handler --> SQLite[(SQLite DB)]
+    Scrapers -->|Web Scraping| Flipkart[Flipkart Web]
+    LLM -->|API Call| GroqCloud[Groq Cloud API]
+```
 
-This project presents an **AI-driven Decision Support Dashboard** that integrates **Large Language Models (LLMs)**, 
-**time-frame–based analysis**, and **DevOps-enabled deployment** to assist users in making informed e-commerce decisions.
+## 🚀 Features
+- **Price Forecasting**: Predictive analytics using Facebook Prophet and Amazon Chronos.
+- **Sentiment Analysis**: LLM-powered review analysis (using Groq) for customer sentiment.
+- **Real-Time Scraping**: Automated data collection from Flipkart for prices and reviews.
+- **Decision Engine**: "Buy vs Wait" recommendations based on combined price-sentiment data.
+- **Health Monitoring**: Built-in health check endpoint for production reliability.
+- **Modular Design**: Clean separation of concerns for easy maintenance and scaling.
 
----
+## 🛠️ How to Run
 
-## Problem Statement
-Current e-commerce analytics tools suffer from the following limitations:
+### Option 1: Docker (Recommended)
+The easiest way to run the entire stack with persistence.
+```bash
+# 1. Clone properties and create .env (see Environment section)
+# 2. Start with Docker Compose
+docker-compose up --build
+```
+The dashboard will be available at [http://localhost:8000](http://localhost:8000).
 
-- Difficulty in interpreting price variations across platforms within a selected time frame  
-- Inadequate analysis of customer sentiment trends over time  
-- Limited visualization for historical and comparative analytics  
-- Lack of automated, version-controlled, and maintainable deployment workflows  
+### Option 2: Local Run
+Ensure you have Python 3.10+ installed.
+```bash
+# 1. Install dependencies
+pip install -r requirements.txt
 
-There is a need for an intelligent, scalable, and interpretable decision support system.
+# 2. Start the server
+python -m uvicorn backend.app.main:app --reload --port 8000
+```
 
----
+## 📡 API Endpoints
 
-## Proposed Solution
-The proposed system is an AI-powered dashboard designed to:
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/health` | System health check (returns "ok") |
+| GET | `/api/products` | List all products in the database |
+| POST | `/api/scrape/flipkart-price` | Scrape price history from a Flipkart URL |
+| POST | `/api/scrape/flipkart-reviews` | Scrape reviews for a specific search query |
+| POST | `/api/forecast` | Run Prophet/Chronos forecast for a product |
+| POST | `/api/sentiment/analyze` | Analyze sentiment for product reviews |
+| POST | `/api/decision` | Get a final "Buy/Wait" recommendation |
 
-- Analyze product pricing data across user-defined time frames  
-- Apply LLM-based sentiment and aspect-level analysis on customer reviews  
-- Present insights through interactive and decision-oriented visualizations  
-- Employ Git-based version control and DevOps pipelines for automation and scalability  
+## ⚙️ Environment Variables
+Create a `.env` file in the root directory:
+```env
+APP_TITLE=ForecastPro Dashboard
+DATABASE_URL=sqlite:///./data/database.sqlite
+GROQ_API_KEY=your_groq_api_key_here
+PORT=8000
+DEBUG=False
+```
 
-The platform focuses on **decision facilitation** rather than prediction.
+## 🧪 Testing
+Run the automated test suite to verify the installation (ensure you are at the project root):
+```bash
+python -m pytest
+```
 
----
-
-## System Architecture Overview
-The system follows a modular and scalable architecture:
-
-- **Data Layer:** Structured pricing and review datasets organized by time intervals  
-- **AI Layer:**  
-  - LLMs for sentiment classification, aspect extraction, and review summarization  
-- **Backend Layer:** API-based services for time-frame–specific data retrieval  
-- **Visualization Layer:** Dashboards for price trends, sentiment distribution, and comparisons  
-- **DevOps Layer:** Git-managed repositories with CI/CD pipelines for automated deployment  
-
----
-
-## Technologies Used
-
-### Artificial Intelligence
-- Large Language Models (LLMs) for sentiment analysis and text interpretation  
-
-### Development & DevOps
-- Git and GitHub for version control and collaboration  
-- Docker for containerization  
-- CI/CD pipelines for automated testing and deployment  
-
----
-
-## Key Features
-- Time-frame–based price analysis across e-commerce platforms  
-- LLM-driven sentiment and aspect-level insights from reviews  
-- Interactive dashboards for decision support  
-- Modular API-driven backend architecture  
-- Automated DevOps workflows  
-
----
-
-## Applications
-- Consumer decision support for online purchases  
-- Business intelligence and e-commerce analytics  
-- Market trend interpretation over defined time periods  
-- AI-enabled decision support systems  
-
----
-
-## Future Scope
-- Advanced decision recommendations based on historical trends  
-- Expansion to multiple product categories  
-- Improved interpretability using Explainable AI (XAI) techniques  
-
----
-
-## Conclusion
-This project demonstrates how **Large Language Models, data visualization, and DevOps practices** can be combined to build an effective decision support dashboard for e-commerce analytics. 
-By emphasizing time-frame–based analysis and interpretability, the system bridges the gap between raw data and informed decision-making.
-
----
+## 📂 Project Structure
+```
+/backend
+  /app
+    /models     # Pydantic schemas for request/response validation
+    /database   # SQLite connection and data persistence logic
+    /routes     # FastAPI APIRouter definitions
+    /services   # Core business logic: forecasting, scraping, sentiment
+    /main.py    # Application entry point and configuration
+/tests          # Pytest suite for API and logic validation
+/data           # Local storage for SQLite database and data files
+/docker         # Docker configuration files
+```
