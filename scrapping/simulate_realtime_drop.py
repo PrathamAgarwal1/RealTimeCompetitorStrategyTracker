@@ -53,7 +53,7 @@ def test_live_alert():
         if not res.get("success"):
             print("Failed to subscribe.")
             sys.exit(1)
-        print("✅ Subscribed successfully!")
+        print("Subscribed successfully!")
     except Exception as e:
         print(f"Failed to subscribe. Error: {e}")
         sys.exit(1)
@@ -92,8 +92,8 @@ def test_live_alert():
         )
         
         if mock_price <= target_price:
-            print(f"🎯 Target price of ₹{target_price} met or exceeded!")
-            print("✅ Email alert should have been triggered by backend.")
+            print(f"Target price of ₹{target_price} met or exceeded!")
+            print("Email alert should have been triggered by backend.")
             break
 
     print("=== Simulation Complete ===")

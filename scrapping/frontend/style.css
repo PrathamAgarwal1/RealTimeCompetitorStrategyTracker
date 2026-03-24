@@ -643,15 +643,16 @@ h3 {
 
 .metric-values {
     display: flex;
-    gap: 1rem;
-    margin-bottom: 0.5rem;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: 0.75rem;
 }
 
 .metric-val {
     display: flex;
     align-items: center;
     gap: 0.4rem;
-    font-size: 1.35rem;
+    font-size: 1.15rem;
     font-weight: 700;
     color: var(--text-main);
 }
@@ -667,6 +668,9 @@ h3 {
     font-size: 0.75rem;
     color: var(--amber);
     font-weight: 500;
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
 }
 
 .metrics-table-wrap {
