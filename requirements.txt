@@ -17,6 +17,7 @@ pydantic-settings>=2.1.0
 groq>=0.4.0
 
 # Forecasting Dependencies
+plotly>=5.18.0
 prophet>=1.1.0
 torch>=2.0.0
 chronos-forecasting

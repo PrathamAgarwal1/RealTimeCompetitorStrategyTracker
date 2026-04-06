@@ -6,7 +6,13 @@
 .git
 .github
 tests/
-scrapping/
+scrapping/backend/
+scrapping/data/
+scrapping/.gitignore
+scrapping/README.md
+scrapping/requirements.txt
+scrapping/run.py
+scrapping/migrate_to_sqlite.py
 data/
 *.db
 *.sqlite
