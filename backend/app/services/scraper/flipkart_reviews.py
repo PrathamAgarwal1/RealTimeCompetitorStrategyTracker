@@ -10,6 +10,9 @@ from .utils import create_stealth_driver, clean_text
 from selenium.webdriver.common.by import By
 from bs4 import BeautifulSoup
 import pandas as pd
+import logging
+
+logger = logging.getLogger(__name__)
 
 # ---------------------------
 # CONFIG

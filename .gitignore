@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+dist/
+venv/
+env/
+ENV/
+
+# Environment
+.env
+.env.local
+.env.*
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Data files
+*.csv
+*.xlsx
+*.json
+!package.json
+!package-lock.json
+*.pkl
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Scraped data
+scrapping/data/
+scrapping/raw/
