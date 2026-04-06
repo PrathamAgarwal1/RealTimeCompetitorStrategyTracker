@@ -9,11 +9,14 @@ WORKDIR /app
 # Install system dependencies if any are needed (e.g., for Prophet/PyTorch)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
+    chromium \
+    chromium-driver \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first for better caching
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --default-timeout=1000 torch>=2.0.0 --index-url https://download.pytorch.org/whl/cpu && \
+    pip install --no-cache-dir --default-timeout=1000 -r requirements.txt
 
 # Copy the rest of the application
 COPY . .
