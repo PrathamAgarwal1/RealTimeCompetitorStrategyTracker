@@ -9,6 +9,8 @@ WORKDIR /app
 # Install system dependencies if any are needed (e.g., for Prophet/PyTorch)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
+    chromium \
+    chromium-driver \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first for better caching

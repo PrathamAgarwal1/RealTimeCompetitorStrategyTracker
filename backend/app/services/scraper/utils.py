@@ -1,6 +1,7 @@
 import os
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 from selenium_stealth import stealth
 
 def create_stealth_driver(headless=True):
@@ -10,6 +11,7 @@ def create_stealth_driver(headless=True):
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-blink-features=AutomationControlled")
     options.add_argument("--lang=en-IN")
+    options.binary_location = "/usr/bin/chromium"
     if headless:
         options.add_argument("--headless=new") 
     options.add_argument("--window-size=1920,1080")
@@ -21,7 +23,8 @@ def create_stealth_driver(headless=True):
     options.add_experimental_option("excludeSwitches", ["enable-automation"])
     options.add_experimental_option("useAutomationExtension", False)
 
-    driver = webdriver.Chrome(options=options)
+    service = Service("/usr/bin/chromedriver")
+    driver = webdriver.Chrome(service=service, options=options)
     stealth(driver,
         languages=["en-US", "en"],
         vendor="Google Inc.",
