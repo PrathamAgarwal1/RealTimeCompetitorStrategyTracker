@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 # CONFIG
 # ---------------------------
 
-MAX_PAGES = 10          # Max review pages to scrape
+MAX_PAGES = 3        # Max review pages to scrape
 DELAY_RANGE = (2, 4)    # Random delay (seconds) between requests
 
 
@@ -30,7 +30,7 @@ def click_first_product_and_switch(driver, query: str) -> str:
     encoded = quote_plus(query)
     search_url = f"https://www.flipkart.com/search?q={encoded}"
 
-    print(f"🔍 Searching: '{query}' ...")
+    logger.info(f"Searching: '{query}' ...")
     driver.get(search_url)
     time.sleep(3) # Let search results load
 
@@ -43,7 +43,7 @@ def click_first_product_and_switch(driver, query: str) -> str:
     first_link = product_links[0]
     title = first_link.text or "Product"
 
-    print(f"✅ Found product. Clicking into it...")
+    logger.info("Found product. Clicking into it...")
     
     # Use JavaScript click to bypass any popups/overlays
     driver.execute_script("arguments[0].click();", first_link)
@@ -62,7 +62,7 @@ def click_first_product_and_switch(driver, query: str) -> str:
 # ---------------------------
 
 def navigate_to_reviews_page(driver):
-    print("📦 Scrolling product page to find 'All Reviews' link...")
+    logger.info("Scrolling product page to find 'All Reviews' link...")
     
     reviews_url = None
     # Scroll down 600px at a time, looking for the review link
@@ -85,11 +85,11 @@ def navigate_to_reviews_page(driver):
             break
 
     if reviews_url:
-        print(f"📄 Found Reviews link! Navigating...")
+        logger.info("Found Reviews link! Navigating...")
         driver.get(reviews_url)
         return True
     else:
-        print("⚠️ Could not find an explicit 'All Reviews' link. Attempting URL fallback...")
+        logger.warning("Could not find an explicit 'All Reviews' link. Attempting URL fallback...")
         current_url = driver.current_url
         if "/p/" in current_url:
             fallback_url = current_url.replace("/p/", "/product-reviews/").split("?")[0] + "?marketplace=FLIPKART&page=1"
@@ -194,7 +194,7 @@ def scrape_all_reviews(driver, max_pages: int = MAX_PAGES) -> list[dict]:
     base_url = re.sub(r"&page=\d+", "", current_url)
 
     for page in range(1, max_pages + 1):
-        print(f"  → Loading and scrolling Page {page} ...")
+        logger.info(f"Loading and scrolling Page {page} ...")
         page_url = f"{base_url}&page={page}"
         if driver.current_url != page_url:
             driver.get(page_url)
@@ -210,10 +210,10 @@ def scrape_all_reviews(driver, max_pages: int = MAX_PAGES) -> list[dict]:
         page_reviews = extract_reviews_from_page(soup)
 
         if not page_reviews:
-            print(f"  ⚠️  No reviews found on page {page}. Stopping.")
+            logger.warning(f"No reviews found on page {page}. Stopping.")
             break
 
-        print(f"  ✅ {len(page_reviews)} reviews found.")
+        logger.info(f"{len(page_reviews)} reviews found.")
         all_reviews.extend(page_reviews)
         time.sleep(random.uniform(*DELAY_RANGE))
 
@@ -239,7 +239,7 @@ def fetch_flipkart_reviews(query: str, max_pages: int = MAX_PAGES) -> dict:
         if not success:
             return {"success": False, "error": "Could not reach the dedicated reviews page."}
 
-        print(f"🚀 Scraping up to {max_pages} pages ...\n")
+        logger.info(f"Scraping up to {max_pages} pages ...")
         raw_reviews = scrape_all_reviews(driver, max_pages)
         
         # Map user's keys to standardized backend format for SQLite
@@ -264,11 +264,11 @@ def fetch_flipkart_reviews(query: str, max_pages: int = MAX_PAGES) -> dict:
         }
         
     except Exception as e:
-         print(f"❌ Scraper error: {e}")
+         logger.error(f"Scraper error: {e}")
          return {"success": False, "error": str(e)}
     finally:
         driver.quit()
-        print("🛑 Browser closed.")
+        logger.info("Browser closed.")
 
 if __name__ == "__main__":
     # Support for CLI usage if needed

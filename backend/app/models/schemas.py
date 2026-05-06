@@ -4,6 +4,7 @@ from typing import Optional
 class ScrapeRequest(BaseModel):
     query: Optional[str] = None
     url: Optional[str] = None
+    max_pages: int = 3
 
 class ForecastRequest(BaseModel):
     product_name: str

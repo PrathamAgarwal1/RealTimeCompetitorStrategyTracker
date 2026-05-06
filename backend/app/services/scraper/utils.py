@@ -11,7 +11,8 @@ def create_stealth_driver(headless=True):
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-blink-features=AutomationControlled")
     options.add_argument("--lang=en-IN")
-    options.binary_location = "/usr/bin/chromium"
+    if os.path.exists("/usr/bin/chromium"):
+        options.binary_location = "/usr/bin/chromium"
     if headless:
         options.add_argument("--headless=new") 
     options.add_argument("--window-size=1920,1080")
@@ -23,8 +24,11 @@ def create_stealth_driver(headless=True):
     options.add_experimental_option("excludeSwitches", ["enable-automation"])
     options.add_experimental_option("useAutomationExtension", False)
 
-    service = Service("/usr/bin/chromedriver")
-    driver = webdriver.Chrome(service=service, options=options)
+    if os.path.exists("/usr/bin/chromedriver"):
+        service = Service("/usr/bin/chromedriver")
+        driver = webdriver.Chrome(service=service, options=options)
+    else:
+        driver = webdriver.Chrome(options=options)
     stealth(driver,
         languages=["en-US", "en"],
         vendor="Google Inc.",
